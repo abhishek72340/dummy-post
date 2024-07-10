@@ -6,17 +6,13 @@ import { Button, P } from "../styles/reactPortal/ReactPortalStyle.js";
 
 const ReactPortal = ({ postData, setPostData, isOpen, setIsOpen }) => {
   const [formData, setFormData] = useState({
-    userId: "",
     title: "",
     body: "",
   });
   const [validation, setValidation] = useState({
-    userId: false,
     title: false,
     body: false,
   });
-  const userIdValidation =
-    validation.userId && formData.userId.trim().length === 0;
   const titleValidation =
     validation.title && formData.title.trim().length === 0;
   const bodyValidation = validation.body && formData.body.trim().length === 0;
@@ -25,7 +21,9 @@ const ReactPortal = ({ postData, setPostData, isOpen, setIsOpen }) => {
     const fetchPostData = async () => {
       try {
         const data = await getPost();
-        setPostData(data);
+        const user = JSON.parse(localStorage.getItem("token"));
+        const userPosts = data?.filter((post) => post?.userId === user?.id);
+        setPostData(userPosts);
       } catch (err) {
         console.error(err);
       }
@@ -41,34 +39,47 @@ const ReactPortal = ({ postData, setPostData, isOpen, setIsOpen }) => {
     setFormData((prev) => ({ ...prev, [identifier]: value }));
     setValidation((prev) => ({ ...prev, [identifier]: false }));
   };
+
   const blurHandler = (identifier) => {
     setValidation((prev) => ({ ...prev, [identifier]: true }));
   };
+
   const submitHandler = async (e) => {
     e.preventDefault();
-    if (!formData.userId || !formData.title || !formData.body) {
+
+    if (!formData.title || !formData.body) {
       setValidation({
-        userId: !formData.userId,
         title: !formData.title,
         body: !formData.body,
       });
       return;
     }
 
+    const user = JSON.parse(localStorage.getItem("token"));
+    if (!user) {
+      toast.error("User not logged in");
+      return;
+    }
+
     try {
       const res = await fetch("https://jsonplaceholder.typicode.com/posts", {
         method: "POST",
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          title: formData.title,
+          body: formData.body,
+          userId: user.id,
+        }),
         headers: {
           "Content-type": "application/json; charset=UTF-8",
         },
       });
+
       const result = await res.json();
       if (result) {
         toast.success("Post added successfully!");
+        setPostData((prev) => [...prev, result]);
         setIsOpen(false);
         setFormData({
-          userId: "",
           title: "",
           body: "",
         });
@@ -80,22 +91,8 @@ const ReactPortal = ({ postData, setPostData, isOpen, setIsOpen }) => {
 
   return (
     <div>
-      {" "}
       <PortalModal isOpen={isOpen} onClose={closeModal}>
         <form onSubmit={submitHandler}>
-          <div style={{ marginBottom: "10px" }}>
-            <label htmlFor="userId">Enter UserId</label>
-            <input
-              type="number"
-              id="userId"
-              name="userId"
-              value={formData.userId}
-              onChange={(e) => changeHandler("userId", e.target.value)}
-              onBlur={() => blurHandler("userId")}
-              style={{ padding: "8px", width: "100%" }}
-            />
-            {userIdValidation && <P>UserId is required</P>}
-          </div>
           <div style={{ marginBottom: "10px" }}>
             <label htmlFor="title">Enter Title</label>
             <input

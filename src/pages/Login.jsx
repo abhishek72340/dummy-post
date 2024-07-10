@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 import { getAuth } from "../services/loginService";
 import {
   LoginContainer,
@@ -56,9 +56,10 @@ const Login = () => {
           user?.email === loginData?.email &&
           user?.phone === loginData?.password
       );
+      console.log("matchedUser", matchedUser);
       if (matchedUser) {
         navigate("/");
-        localStorage.setItem("token", JSON.stringify(loginData));
+        localStorage.setItem("token", JSON.stringify(matchedUser));
         toast.success("Login successfully");
       } else {
         toast.error("Invalid email or password, Please try again!!");

@@ -13,7 +13,7 @@ const Header = () => {
   return (
     <div>
       <ButtonContainer>
-        <H4>{token.email}</H4>
+        <H4>{token?.username}</H4>
         <Button onClick={LogoutHandler}>Log Out</Button>
       </ButtonContainer>
     </div>
