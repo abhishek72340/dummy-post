@@ -13,6 +13,7 @@ const ReactPortal = ({ postData, setPostData, isOpen, setIsOpen }) => {
     title: false,
     body: false,
   });
+
   const titleValidation =
     validation.title && formData.title.trim().length === 0;
   const bodyValidation = validation.body && formData.body.trim().length === 0;
@@ -39,53 +40,61 @@ const ReactPortal = ({ postData, setPostData, isOpen, setIsOpen }) => {
     setFormData((prev) => ({ ...prev, [identifier]: value }));
     setValidation((prev) => ({ ...prev, [identifier]: false }));
   };
-
   const blurHandler = (identifier) => {
     setValidation((prev) => ({ ...prev, [identifier]: true }));
   };
 
   const submitHandler = async (e) => {
     e.preventDefault();
+    const user = JSON.parse(localStorage.getItem("token"));
 
-    if (!formData.title || !formData.body) {
-      setValidation({
-        title: !formData.title,
-        body: !formData.body,
-      });
-      return;
+    if (!formData.title) {
+      setValidation((prev) => ({ ...prev, title: true }));
+    }
+    if (!formData.body) {
+      setValidation((prev) => ({ ...prev, body: true }));
     }
 
-    const user = JSON.parse(localStorage.getItem("token"));
-    // if (!user) {
-    //   toast.error("User not logged in");
+    // if (!formData.title || !formData.body) {
+    //   setValidation({
+    //     title: !formData.title,
+    //     body: !formData.body,
+    //   });
     //   return;
     // }
 
-    try {
-      const res = await fetch("https://jsonplaceholder.typicode.com/posts", {
-        method: "POST",
-        body: JSON.stringify({
-          title: formData.title,
-          body: formData.body,
-          userId: user.id,
-        }),
-        headers: {
-          "Content-type": "application/json; charset=UTF-8",
-        },
-      });
-
-      const result = await res.json();
-      if (result) {
-        toast.success("Post added successfully!");
-        setPostData((prev) => [...prev, result]);
-        setIsOpen(false);
-        setFormData({
-          title: "",
-          body: "",
+    if (
+      !titleValidation &&
+      !bodyValidation &&
+      formData.title &&
+      formData.body
+    ) {
+      try {
+        const res = await fetch("https://jsonplaceholder.typicode.com/posts", {
+          method: "POST",
+          body: JSON.stringify({
+            title: formData.title,
+            body: formData.body,
+            userId: user.id,
+          }),
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
         });
+
+        const result = await res.json();
+        if (result) {
+          toast.success("Post added successfully!");
+          setPostData((prev) => [...prev, result]);
+          setIsOpen(false);
+          setFormData({
+            title: "",
+            body: "",
+          });
+        }
+      } catch (err) {
+        console.log(err);
       }
-    } catch (err) {
-      console.log(err);
     }
   };
 

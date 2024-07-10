@@ -56,7 +56,6 @@ const Login = () => {
           user?.email === loginData?.email &&
           user?.phone === loginData?.password
       );
-      console.log("matchedUser", matchedUser);
       if (matchedUser) {
         navigate("/");
         localStorage.setItem("token", JSON.stringify(matchedUser));
