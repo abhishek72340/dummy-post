@@ -56,10 +56,10 @@ const ReactPortal = ({ postData, setPostData, isOpen, setIsOpen }) => {
     }
 
     const user = JSON.parse(localStorage.getItem("token"));
-    if (!user) {
-      toast.error("User not logged in");
-      return;
-    }
+    // if (!user) {
+    //   toast.error("User not logged in");
+    //   return;
+    // }
 
     try {
       const res = await fetch("https://jsonplaceholder.typicode.com/posts", {
